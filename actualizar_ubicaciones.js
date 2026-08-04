@@ -6,52 +6,41 @@
 //   npm install cheerio
 
 const cheerio = require("cheerio");
+const fs = require("fs");
+const path = require("path");
+
+// Cargar .env manualmente (sin dependencias externas)
+try {
+  const envPath = path.join(__dirname, ".env");
+  if (fs.existsSync(envPath)) {
+    const envContent = fs.readFileSync(envPath, "utf-8");
+    const lines = envContent.split("\n");
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      const eqIdx = trimmed.indexOf("=");
+      if (eqIdx === -1) continue;
+      const key = trimmed.slice(0, eqIdx).trim();
+      const value = trimmed.slice(eqIdx + 1).trim();
+      if (!process.env[key]) {
+        process.env[key] = value;
+      }
+    }
+    console.log("[.env] Archivo cargado correctamente.");
+  }
+} catch (err) {
+  console.warn("[.env] No se pudo cargar el archivo .env:", err.message);
+}
 
 const BASE = "https://www.rosario.gob.ar/gesu-webapp";
 
 const USERNAME = "jespino2";
 const PASSWORD = "Javier2@26";
 
-// -------------------------------------------------------------------
-// EDITAR ACA: lista de IDs de equipamiento (lamparas) a re-actualizar
-// -------------------------------------------------------------------
-const IDS = [
-  517224,
-  517223,
-  218820,
-  218819,
-  218818,
-  218817,
-  218816,
-  218815,
-  218814,
-  218813,
-  218812,
-  218811,
-  218810,
-  218809,
-  218808,
-  199722,
-  199721,
-  199720,
-  199719,
-  199718,
-  199717,
-  199716,
-  199715,
-  199714,
-  150051,
-  150050,
-  150049,
-  150048,
-  150046,
-  150045,
-  150044,
-  150043,
-  150041,
-  149990,
-  149988,
-];
+// Leer IDs desde variable de entorno
+const IDS = process.env.IDS_ACTUALIZAR_UBICACIONES
+  ? process.env.IDS_ACTUALIZAR_UBICACIONES.split(",").map(id => parseInt(id.trim(), 10))
+  : [];
 
 function parseCookies(setCookieHeaders) {
   const cookies = {};
@@ -259,10 +248,11 @@ async function actualizarUbicacion(cookies, id) {
 
 async function main() {
   if (IDS.length === 0) {
-    console.error("No hay IDs cargados en la lista IDS. Editar el script y agregar los IDs.");
+    console.error("No hay IDs cargados en la variable IDS_ACTUALIZAR_UBICACIONES del archivo .env");
     process.exit(1);
   }
 
+  console.log(`IDs cargados desde .env: ${IDS.length}`);
   const cookies = await login();
 
   const resultados = { ok: [], error: [] };
