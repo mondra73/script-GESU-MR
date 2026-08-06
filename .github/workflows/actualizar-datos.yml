@@ -26,7 +26,7 @@ jobs:
           PASSWORD: ${{ secrets.GESU_PASSWORD }}
         run: node export_completo_combinado.js
 
-        - name: Verificar si se generó el archivo
+      - name: Verificar si se generó el archivo
         run: |
           if [ -f datos_completos.json.gz ]; then
             echo "Archivo generado correctamente"
