@@ -2,13 +2,14 @@ name: Actualizar datos GESU
 
 on:
   schedule:
-    # 5 AM hora Argentina (UTC-3) = 8 AM UTC
     - cron: '0 8 * * *'
-  workflow_dispatch:  # Permite ejecutarlo manualmente desde GitHub
+  workflow_dispatch:
 
 jobs:
   actualizar:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout del repositorio
@@ -25,10 +26,24 @@ jobs:
           PASSWORD: ${{ secrets.GESU_PASSWORD }}
         run: node export_completo_combinado.js
 
-      - name: Commit y push del JSON generado
+      - name: Verificar si se generó el archivo
+        run: |
+          if [ -f datos_completos.json ]; then
+            echo "Archivo generado correctamente"
+            ls -lh datos_completos.json
+          else
+            echo "ERROR: No se generó datos_completos.json"
+            exit 1
+          fi
+
+      - name: Commit y push del JSON
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add datos_completos.json
-          git diff --staged --quiet || git commit -m "Actualización automática de datos $(date +'%Y-%m-%d %H:%M')"
-          git push
+          if git diff --staged --quiet; then
+            echo "No hay cambios para commitear"
+          else
+            git commit -m "Actualización automática de datos $(date +'%Y-%m-%d')"
+            git push
+          fi
