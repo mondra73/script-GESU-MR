@@ -26,13 +26,13 @@ jobs:
           PASSWORD: ${{ secrets.GESU_PASSWORD }}
         run: node export_completo_combinado.js
 
-      - name: Verificar si se generó el archivo
+        - name: Verificar si se generó el archivo
         run: |
-          if [ -f datos_completos.json ]; then
+          if [ -f datos_completos.json.gz ]; then
             echo "Archivo generado correctamente"
-            ls -lh datos_completos.json
+            ls -lh datos_completos.json.gz
           else
-            echo "ERROR: No se generó datos_completos.json"
+            echo "ERROR: No se generó datos_completos.json.gz"
             exit 1
           fi
 
@@ -40,7 +40,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add datos_completos.json
+          git add datos_completos.json.gz
           if git diff --staged --quiet; then
             echo "No hay cambios para commitear"
           else
