@@ -325,3 +325,12 @@ pegar ahí los IDs "crudos" copiados de Excel antes de formatearlos.
   cambio que haga la plataforma en sus formularios o endpoints puede
   romperlos, y conviene revisar los resultados de tandas grandes (sobre
   todo bajas, que son irreversibles) antes de darlas por hechas.
+
+  NOTA MIA:
+
+Cómo consume esto el dashboard
+El dashboard solo tiene que hacer un fetch a:
+
+text
+https://raw.githubusercontent.com/mondra73/script-GESU-MR/main/datos_completos.json.gz
+Descomprimirlo en el front (con pako o similar) y ya tiene los ~172k registros listos para mostrar. Sin esperar 3 minutos, sin depender de GESU, sin backend.
