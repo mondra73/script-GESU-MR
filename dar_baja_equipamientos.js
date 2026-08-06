@@ -34,8 +34,8 @@ try {
 
 const BASE = "https://www.rosario.gob.ar/gesu-webapp";
 
-const USERNAME = "jespino2";
-const PASSWORD = "Javier2@26";
+const USERNAME = "rsalvia0";
+const PASSWORD = "Destileriasonora5150";
 
 // Leer IDs desde variable de entorno
 const IDS = process.env.IDS_BAJA_EQUIPAMIENTOS

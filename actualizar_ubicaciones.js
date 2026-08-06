@@ -34,8 +34,8 @@ try {
 
 const BASE = "https://www.rosario.gob.ar/gesu-webapp";
 
-const USERNAME = "jespino2";
-const PASSWORD = "Javier2@26";
+const USERNAME = "cmaldon0";
+const PASSWORD = "Juana300";
 
 // Leer IDs desde variable de entorno
 const IDS = process.env.IDS_ACTUALIZAR_UBICACIONES
@@ -257,8 +257,20 @@ async function main() {
 
   const resultados = { ok: [], error: [] };
 
-  for (const id of IDS) {
-    process.stdout.write(`Procesando id=${id} ... `);
+    const inicio = Date.now();
+  const total = IDS.length;
+
+  for (let i = 0; i < IDS.length; i++) {
+    const id = IDS[i];
+    const actual = i + 1;
+
+    // Calcular tiempo restante estimado
+    const transcurrido = (Date.now() - inicio) / 1000;
+    const restantes = total - actual;
+    const segPorId = transcurrido / actual;
+    const minRestantes = Math.ceil((restantes * segPorId) / 60);
+
+    process.stdout.write(`[${actual}/${total}] id=${id} (~${minRestantes} min rest) ... `);
     try {
       await actualizarUbicacion(cookies, id);
       console.log("OK");
@@ -267,7 +279,7 @@ async function main() {
       console.log("ERROR:", err.message);
       resultados.error.push({ id, error: err.message });
     }
-    await sleep(1500); // pausa entre requests para no saturar el backend
+    await sleep(1500);
   }
 
   console.log("\n== Resumen ==");
