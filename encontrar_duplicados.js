@@ -149,7 +149,7 @@ async function main() {
     console.log(`[1/${totalPaginas}] Página 1: ${todosLosIDs.length} IDs extraídos (total acumulado: ${todosLosIDs.length})`);
 
     // Procesar páginas 2 en adelante
-    for (let pagina = 2; pagina <= totalPaginas; pagina++) {
+    for (let pagina = 2786; pagina <= totalPaginas; pagina++) {
         try {
             const html = await obtenerPagina(cookies, pagina);
             const ids = extraerIDs(html);
