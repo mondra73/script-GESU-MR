@@ -12,27 +12,18 @@ una desde el navegador.
   npm install cheerio
   ```
 
-## Usuario y contraseña
+## Configuración de credenciales
 
-Cada script tiene su usuario y contraseña de GESU escritos directamente en
-el código (constantes `USERNAME` / `PASSWORD` al principio del archivo).
+Las credenciales de GESU **no** están en el código. Cada script las lee desde
+variables de entorno al momento de ejecutarse.
 
-⚠️ **Revisar que cada script tenga cargada la cuenta correcta antes de
-correrlo.** Actualmente:
+### Uso local
 
-| Script | Usuario configurado |
-|---|---|
-| `export_zonas.js` | `jespino2` |
-| `encontrar_duplicados.js` | `jespino2` |
-| `actualizar_ubicaciones.js` | `cmaldon0` |
-| `dar_baja_equipamientos.js` | `rsalvia0` |
+Crear un archivo `.env` en la raíz del proyecto con:
 
-Si alguno de estos usuarios no es el que corresponde (por ejemplo, si se
-copió una plantilla sin actualizar el usuario), corregirlo en el código
-antes de ejecutar — cada acción en GESU queda registrada bajo la cuenta que
-inicia sesión.
-
----
+```env
+USERNAME=usuario
+PASSWORD=contraseña
 
 ## 1. `export_zonas.js` — Exportar CSV de equipamientos por zona
 

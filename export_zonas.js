@@ -6,8 +6,28 @@ const fs = require("fs");
 
 const BASE = "https://www.rosario.gob.ar/gesu-webapp";
 
-const USERNAME = "jespino2";
-const PASSWORD = "Javier2@26";
+const path = require("path");
+
+// Cargar .env manualmente
+try {
+  const envPath = path.join(__dirname, ".env");
+  if (fs.existsSync(envPath)) {
+    const envContent = fs.readFileSync(envPath, "utf-8");
+    const lines = envContent.split("\n");
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      const eqIdx = trimmed.indexOf("=");
+      if (eqIdx === -1) continue;
+      const key = trimmed.slice(0, eqIdx).trim();
+      const value = trimmed.slice(eqIdx + 1).trim();
+      if (!process.env[key]) process.env[key] = value;
+    }
+  }
+} catch (err) {}
+
+const USERNAME = process.env.USERNAME || "";
+const PASSWORD = process.env.PASSWORD || "";
 
 // idArea de cada zona (segun el <select id="areas"> del home)
 const ZONAS = [
