@@ -5,11 +5,10 @@
 // Requiere Node 18+ y cheerio: npm install cheerio
 
 const cheerio = require("cheerio");
-
-const BASE = "https://www.rosario.gob.ar/gesu-webapp";
-
 const fs = require("fs");
 const path = require("path");
+
+const BASE = "https://www.rosario.gob.ar/gesu-webapp";
 
 // Cargar .env manualmente
 try {
@@ -24,10 +23,13 @@ try {
       if (eqIdx === -1) continue;
       const key = trimmed.slice(0, eqIdx).trim();
       const value = trimmed.slice(eqIdx + 1).trim();
-      if (!process.env[key]) process.env[key] = value;
+      if (key === "USERNAME" || key === "PASSWORD" || !process.env[key]) process.env[key] = value;
     }
+    console.log("[.env] Archivo cargado correctamente.");
   }
-} catch (err) {}
+} catch (err) {
+  console.warn("[.env] No se pudo cargar el archivo .env:", err.message);
+}
 
 const USERNAME = process.env.USERNAME || "";
 const PASSWORD = process.env.PASSWORD || "";
@@ -144,17 +146,14 @@ async function main() {
 
     const cookies = await login();
 
-    // Primero obtenemos la página 1 para saber el total de páginas
     console.log("Obteniendo página 1 para calcular total de páginas...");
     const htmlPagina1 = await obtenerPagina(cookies, 1);
     const $ = cheerio.load(htmlPagina1);
 
-    // Extraer el número total de páginas del paginador
     const ultimoLink = $(".paginador a[title*='última']").attr("href") || "";
     const matchUltima = ultimoLink.match(/d-5687999-p=(\d+)/);
     const totalPaginas = matchUltima ? parseInt(matchUltima[1]) : 6909;
 
-    // También extraer el total de equipamientos
     const titular = $(".titular").text() || "";
     const matchTotal = titular.match(/Equipamientos encontrados:\s*<b>([\d,.]+)<\/b>/) || titular.match(/Equipamientos encontrados:\s*\*?\*?([\d,.]+)/);
     const totalEquipamientos = matchTotal ? matchTotal[1] : "desconocido";
@@ -164,28 +163,25 @@ async function main() {
     console.log(`Tiempo estimado: ~${Math.ceil(totalPaginas * 1.2 / 60)} minutos`);
     console.log("");
 
-    // Procesar página 1 (ya la tenemos)
     let todosLosIDs = extraerIDs(htmlPagina1);
     let paginasProcesadas = 1;
     console.log(`[1/${totalPaginas}] Página 1: ${todosLosIDs.length} IDs extraídos (total acumulado: ${todosLosIDs.length})`);
 
-    // Procesar páginas 2 en adelante
-    for (let pagina = 2786; pagina <= totalPaginas; pagina++) {
+    for (let pagina = 2; pagina <= totalPaginas; pagina++) {
         try {
             const html = await obtenerPagina(cookies, pagina);
             const ids = extraerIDs(html);
             todosLosIDs = todosLosIDs.concat(ids);
             paginasProcesadas++;
 
-            // Mostrar progreso cada página, pero sin saltar línea (más limpio)
             process.stdout.write(`\r[${pagina}/${totalPaginas}] Pág ${pagina}: ${ids.length} IDs | Total acumulado: ${todosLosIDs.length}   `);
-            if (pagina === totalPaginas) console.log(""); // salto de línea al final
+            if (pagina === totalPaginas) console.log("");
 
-            await sleep(800); // pausa para no saturar
+            await sleep(800);
         } catch (err) {
-            console.log(`ERROR en página ${pagina}: ${err.message}. Reintentando...`);
+            console.log(`\nERROR en página ${pagina}: ${err.message}. Reintentando...`);
             await sleep(2000);
-            pagina--; // reintentar
+            pagina--;
         }
     }
 
@@ -197,7 +193,6 @@ async function main() {
     console.log(`Total de IDs recolectados: ${todosLosIDs.length}`);
     console.log("");
 
-    // Encontrar duplicados
     const conteo = {};
     for (const id of todosLosIDs) {
         conteo[id] = (conteo[id] || 0) + 1;
@@ -213,7 +208,7 @@ async function main() {
     } else {
         console.log(`⚠ Se encontraron ${duplicados.length} IDs duplicados:`);
         console.log("");
-        console.log("ID\t\t\tVeces\t\tTipo (si está disponible)");
+        console.log("ID\t\t\tVeces");
         console.log("-".repeat(60));
         for (const dup of duplicados) {
             console.log(`${dup.id}\t\t${dup.cantidad}`);
