@@ -8,6 +8,28 @@
 // (en GitHub Actions se configuran como Secrets)
 
 const fs = require("fs");
+const path = require("path");
+
+// Cargar .env manualmente
+try {
+  const envPath = path.join(__dirname, ".env");
+  if (fs.existsSync(envPath)) {
+    const envContent = fs.readFileSync(envPath, "utf-8");
+    const lines = envContent.split("\n");
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      const eqIdx = trimmed.indexOf("=");
+      if (eqIdx === -1) continue;
+      const key = trimmed.slice(0, eqIdx).trim();
+      const value = trimmed.slice(eqIdx + 1).trim();
+      if (key === "USERNAME" || key === "PASSWORD" || !process.env[key]) process.env[key] = value;
+    }
+    console.log("[.env] Archivo cargado correctamente.");
+  }
+} catch (err) {
+  console.warn("[.env] No se pudo cargar el archivo .env:", err.message);
+}
 
 const BASE = "https://www.rosario.gob.ar/gesu-webapp";
 
